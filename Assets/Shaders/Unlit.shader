@@ -76,4 +76,5 @@
 			ENDCG
 		}
 	}
+	CustomEditor "UnlitShaderGUI"
 }
