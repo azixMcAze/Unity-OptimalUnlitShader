@@ -2,13 +2,22 @@
 {
 	Properties
 	{
+		[Enum(Opaque, 0, Cutout, 1, Transparent, 2)] _RenderingMode("Rendering mode", Int) = 0
+
 		_MainTex ("Texture", 2D) = "white" {}
 		_Color ("Color", color) = (1, 1, 1, 1)
+
+		[HideInInspector] _SrcBlend ("__src", Float) = 1.0
+		[HideInInspector] _DstBlend ("__dst", Float) = 0.0
+		[HideInInspector] _ZWrite ("__zw", Float) = 1.0
 	}
 	SubShader
 	{
 		Tags { "RenderType"="Opaque" }
 		LOD 100
+
+		Blend [_SrcBlend] [_DstBlend]
+		ZWrite [_ZWrite]
 
 		Pass
 		{
