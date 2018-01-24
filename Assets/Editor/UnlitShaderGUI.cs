@@ -5,18 +5,32 @@ using UnityEditor;
 
 public class UnlitShaderGUI : ShaderGUI
 {
+	bool m_firstTime = false;
+
 	public override void OnGUI (MaterialEditor materialEditor, MaterialProperty[] properties)
 	{
+		Material mat = materialEditor.target as Material;
+
+		if(!m_firstTime)
+		{
+			m_firstTime = true;
+			MaterialChanged(mat);
+		}
+
 		EditorGUI.BeginChangeCheck();
 		base.OnGUI (materialEditor, properties);
 		if (EditorGUI.EndChangeCheck())
 		{
-			Material mat = materialEditor.target as Material;
-			bool noTexture = mat.GetTexture("_MainTex") == null;
-			bool noColor = mat.GetColor("_Color") == Color.white;
-			EnableKeyword(mat, "NO_TEXTURE", noTexture);
-			EnableKeyword(mat, "NO_COLOR", noColor);
+			MaterialChanged(materialEditor.target as Material);
 		}
+	}
+
+	void MaterialChanged(Material mat)
+	{
+		bool noTexture = mat.GetTexture("_MainTex") == null;
+		bool noColor = mat.GetColor("_Color") == Color.white;
+		EnableKeyword(mat, "NO_TEXTURE", noTexture);
+		EnableKeyword(mat, "NO_COLOR", noColor);
 	}
 
 	static void EnableKeyword(Material material, string keyword, bool enable)
