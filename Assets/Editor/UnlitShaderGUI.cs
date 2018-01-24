@@ -29,8 +29,8 @@ public class UnlitShaderGUI : ShaderGUI
 	{
 		bool noTexture = mat.GetTexture("_MainTex") == null;
 		bool noColor = mat.GetColor("_Color") == Color.white;
-		EnableKeyword(mat, "NO_TEXTURE", noTexture);
-		EnableKeyword(mat, "NO_COLOR", noColor);
+		EnableKeyword(mat, "_TEXTURE_OFF", noTexture);
+		EnableKeyword(mat, "_COLOR_OFF", noColor);
 	}
 
 	static void EnableKeyword(Material material, string keyword, bool enable)
