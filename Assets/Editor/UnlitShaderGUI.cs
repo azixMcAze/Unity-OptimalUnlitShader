@@ -48,6 +48,7 @@ public class UnlitShaderGUI : ShaderGUI
 				mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
 				mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
 				mat.SetInt("_ZWrite", 1);
+				EnableKeyword(mat, "_ALPHATEST_ON", false);
 				mat.renderQueue = -1;
 				break;
 
@@ -56,6 +57,7 @@ public class UnlitShaderGUI : ShaderGUI
 				mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
 				mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
 				mat.SetInt("_ZWrite", 1);
+				EnableKeyword(mat, "_ALPHATEST_ON", true);
 				mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
 				break;
 
@@ -64,6 +66,7 @@ public class UnlitShaderGUI : ShaderGUI
 				mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
 				mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
 				mat.SetInt("_ZWrite", 0);
+				EnableKeyword(mat, "_ALPHATEST_ON", false);
 				mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
 				break;
 		}

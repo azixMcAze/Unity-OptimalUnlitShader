@@ -6,6 +6,7 @@
 
 		_MainTex ("Texture", 2D) = "white" {}
 		_Color ("Color", color) = (1, 1, 1, 1)
+		_Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
 
 		[HideInInspector] _SrcBlend ("__src", Float) = 1.0
 		[HideInInspector] _DstBlend ("__dst", Float) = 0.0
@@ -28,6 +29,7 @@
 			#pragma multi_compile_fog
 			#pragma shader_feature _ _TEXTURE_OFF
 			#pragma shader_feature _ _COLOR_OFF
+			#pragma shader_feature _ _ALPHATEST_ON
 			#include "UnityCG.cginc"
 
 			struct appdata
@@ -56,6 +58,9 @@
 			#if !_COLOR_OFF
 			fixed4 _Color;
 			#endif
+			#if _ALPHATEST_ON
+			fixed _Cutoff;
+			#endif
 			
 			v2f vert (appdata v)
 			{
@@ -77,6 +82,9 @@
 				#endif
 				#if !_COLOR_OFF
 				col *= _Color;
+				#endif
+				#if _ALPHATEST_ON
+				clip(col.a - _Cutoff)
 				#endif
 				// apply fog
 				UNITY_APPLY_FOG(i.fogCoord, col);
