@@ -17,8 +17,8 @@
 			#pragma fragment frag
 			// make fog work
 			#pragma multi_compile_fog
-			#pragma multi_compile _TEXTURE_OFF _
-			#pragma multi_compile _COLOR_OFF _
+			#pragma shader_feature _TEXTURE_OFF _
+			#pragma shader_feature _COLOR_OFF _
 			#include "UnityCG.cginc"
 
 			struct appdata
