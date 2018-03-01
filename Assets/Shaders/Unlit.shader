@@ -92,7 +92,7 @@
 				col *= _Color;
 			#endif
 			#if defined(_ALPHATEST_ON)
-				clip(col.a - _Cutoff)
+				clip(col.a - _Cutoff);
 			#endif
 				// apply fog
 				UNITY_APPLY_FOG(i.fogCoord, col);
