@@ -35,8 +35,10 @@ public class UnlitShaderGUI : ShaderGUI
 	void MaterialChanged(Material mat)
 	{
 		bool noTexture = mat.GetTexture("_MainTex") == null;
+		bool noMask = mat.GetTexture("_Mask") == null;
 		bool noColor = mat.GetColor("_Color") == Color.white;
 		EnableKeyword(mat, "_TEXTURE_OFF", noTexture);
+		EnableKeyword(mat, "_MASK_OFF", noMask);
 		EnableKeyword(mat, "_COLOR_OFF", noColor);
 
 		RenderingMode renderingMode = (RenderingMode)mat.GetInt("_RenderingMode");
