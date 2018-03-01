@@ -34,28 +34,40 @@
 			#pragma shader_feature _ _ALPHATEST_ON
 			#include "UnityCG.cginc"
 
+			#define CONCAT(A, B) A ## B
+
+			#if !defined(_TEXTURE_OFF) || !defined(_MASK_OFF)
+				#define UV_TEXCOORD TEXCOORD0
+				#define FOG_TEXCOORD 1
+				#if !defined(_TEXTURE_OFF)
+					#define UV_SCALE_OFFSET _MainTex
+				#else
+					#define UV_SCALE_OFFSET _Mask
+				#endif
+			#endif
+
 			struct appdata
 			{
 				float4 vertex : POSITION;
-			#if !defined(_TEXTURE_OFF) || !defined(_MASK_OFF)
-				float2 uv : TEXCOORD0;
+			#if defined(UV_TEXCOORD)
+				float2 uv : UV_TEXCOORD;
 			#endif
 			};
 
 			struct v2f
 			{
-			#if !defined(_TEXTURE_OFF) || !defined(_MASK_OFF)
-				float2 uv : TEXCOORD0;
-				UNITY_FOG_COORDS(1)
-			#else
-				UNITY_FOG_COORDS(0)
+			#if defined(UV_TEXCOORD)
+				float2 uv : UV_TEXCOORD;
 			#endif
+				UNITY_FOG_COORDS(FOG_TEXCOORD)
 				float4 vertex : SV_POSITION;
 			};
 
 		#if !defined(_TEXTURE_OFF)
 			sampler2D _MainTex;
-			float4 _MainTex_ST;
+		#endif
+		#if defined(UV_SCALE_OFFSET)
+			float4 CONCAT(UV_SCALE_OFFSET, _ST);
 		#endif
 		#if !defined(_MASK_OFF)
 			sampler2D _Mask;
@@ -72,7 +84,7 @@
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
 			#if !defined(_TEXTURE_OFF) || !defined(_MASK_OFF)
-				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+				o.uv = TRANSFORM_TEX(v.uv, UV_SCALE_OFFSET);
 			#endif
 				UNITY_TRANSFER_FOG(o,o.vertex);
 				return o;
