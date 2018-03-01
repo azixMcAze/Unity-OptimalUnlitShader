@@ -37,43 +37,43 @@
 			struct appdata
 			{
 				float4 vertex : POSITION;
-			#if !_TEXTURE_OFF || !_MASK_OFF
+			#if !defined(_TEXTURE_OFF) || !defined(_MASK_OFF)
 				float2 uv : TEXCOORD0;
 			#endif
 			};
 
 			struct v2f
 			{
-				#if !_TEXTURE_OFF || !_MASK_OFF
+			#if !defined(_TEXTURE_OFF) || !defined(_MASK_OFF)
 				float2 uv : TEXCOORD0;
 				UNITY_FOG_COORDS(1)
-				#else
+			#else
 				UNITY_FOG_COORDS(0)
-				#endif
+			#endif
 				float4 vertex : SV_POSITION;
 			};
 
-			#if !_TEXTURE_OFF
+		#if !defined(_TEXTURE_OFF)
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
-			#endif
-			#if !_MASK_OFF
+		#endif
+		#if !defined(_MASK_OFF)
 			sampler2D _Mask;
-			#endif
-			#if !_COLOR_OFF
+		#endif
+		#if !defined(_COLOR_OFF)
 			fixed4 _Color;
-			#endif
-			#if _ALPHATEST_ON
+		#endif
+		#if defined(_ALPHATEST_ON)
 			fixed _Cutoff;
-			#endif
+		#endif
 			
 			v2f vert (appdata v)
 			{
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
-				#if !_TEXTURE_OFF || !_MASK_OFF
+			#if !defined(_TEXTURE_OFF) || !defined(_MASK_OFF)
 				o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-				#endif
+			#endif
 				UNITY_TRANSFER_FOG(o,o.vertex);
 				return o;
 			}
@@ -82,18 +82,18 @@
 			{
 				// sample the texture
 				fixed4 col = 1;
-				#if !_TEXTURE_OFF
+			#if !defined(_TEXTURE_OFF)
 				col *= tex2D(_MainTex, i.uv);
-				#endif
-				#if !_MASK_OFF
+			#endif
+			#if !defined(_MASK_OFF)
 				col.a *= tex2D(_Mask, i.uv).a;
-				#endif
-				#if !_COLOR_OFF
+			#endif
+			#if !defined(_COLOR_OFF)
 				col *= _Color;
-				#endif
-				#if _ALPHATEST_ON
+			#endif
+			#if defined(_ALPHATEST_ON)
 				clip(col.a - _Cutoff)
-				#endif
+			#endif
 				// apply fog
 				UNITY_APPLY_FOG(i.fogCoord, col);
 				return col;
