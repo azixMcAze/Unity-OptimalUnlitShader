@@ -12,6 +12,15 @@ public class UnlitShaderGUI : ShaderGUI
 		Transparent = 2,
 	}
 
+	public const string RenderingModePropName = "_RenderingMode";
+	public const string MainTexPropName = "_MainTex";
+	public const string MaskPropName = "_Mask";
+	public const string ColorPropName = "_Color";
+	public const string CutoffPropName = "_Cutoff";
+	public const string SrcBlendPropName = "_SrcBlend";
+	public const string DstBlendPropName = "_DstBlend";
+	public const string ZWritePropName = "_ZWrite";
+
 	bool m_firstTime = false;
 
 	public override void OnGUI (MaterialEditor materialEditor, MaterialProperty[] properties)
@@ -36,22 +45,22 @@ public class UnlitShaderGUI : ShaderGUI
 	{
 		materialEditor.SetDefaultGUIWidths();
 
-		MaterialProperty renderingModeProp = FindProperty("_RenderingMode", properties);
+		MaterialProperty renderingModeProp = FindProperty(RenderingModePropName, properties);
 		materialEditor.ShaderProperty(renderingModeProp, renderingModeProp.displayName);
 
-		MaterialProperty mainTexProp = FindProperty("_MainTex", properties);
+		MaterialProperty mainTexProp = FindProperty(MainTexPropName, properties);
 		materialEditor.ShaderProperty(mainTexProp, mainTexProp.displayName);
 
-		MaterialProperty maskProp = FindProperty("_Mask", properties);
+		MaterialProperty maskProp = FindProperty(MaskPropName, properties);
 		bool maskScaleOffset = true;
 		materialEditor.TextureProperty(maskProp, maskProp.displayName, maskScaleOffset);
 
-		MaterialProperty colorProp = FindProperty("_Color", properties);
+		MaterialProperty colorProp = FindProperty(ColorPropName, properties);
 		materialEditor.ShaderProperty(colorProp, colorProp.displayName);
 
 		if((RenderingMode)renderingModeProp.floatValue == RenderingMode.Cutout)
 		{
-			MaterialProperty cutoffProp = FindProperty("_Cutoff", properties);
+			MaterialProperty cutoffProp = FindProperty(CutoffPropName, properties);
 			materialEditor.ShaderProperty(cutoffProp, cutoffProp.displayName);
 		}
 
@@ -64,52 +73,52 @@ public class UnlitShaderGUI : ShaderGUI
 
 	void MaterialChanged(Material mat)
 	{
-		bool noTexture = mat.GetTexture("_MainTex") == null;
-		Vector2 textureScale = noTexture ? Vector2.one : mat.GetTextureScale("_MainTex");
-        Vector2 textureOffset = noTexture ? Vector2.zero : mat.GetTextureOffset("_MainTex");
+		bool noTexture = mat.GetTexture(MainTexPropName) == null;
+		Vector2 textureScale = noTexture ? Vector2.one : mat.GetTextureScale(MainTexPropName);
+        Vector2 textureOffset = noTexture ? Vector2.zero : mat.GetTextureOffset(MainTexPropName);
 		bool noTextureScale = textureScale == Vector2.one;
         bool noTextureOffset = textureOffset == Vector2.zero;
         bool noTextureScaleOffset = noTextureScale && noTextureOffset;
-		bool noMask = mat.GetTexture("_Mask") == null;
-		Vector2 maskScale = mat.GetTextureScale("_Mask");
-        Vector2 maskOffset = mat.GetTextureOffset("_Mask");
+		bool noMask = mat.GetTexture(MaskPropName) == null;
+		Vector2 maskScale = mat.GetTextureScale(MaskPropName);
+        Vector2 maskOffset = mat.GetTextureOffset(MaskPropName);
 		bool noMaskScale = maskScale == textureScale;
 		bool noMaskOffset = maskOffset == textureOffset;
         bool noMaskScaleOffset = noMaskScale && noMaskOffset;
-		bool noColor = mat.GetColor("_Color") == Color.white;
+		bool noColor = mat.GetColor(ColorPropName) == Color.white;
 		EnableKeyword(mat, "_TEXTURE_OFF", noTexture);
 		EnableKeyword(mat, "_TEXTURE_SCALE_OFFSET_OFF", noTextureScaleOffset && !noTexture);
 		EnableKeyword(mat, "_MASK_OFF", noMask);
 		EnableKeyword(mat, "_MASK_SCALE_OFFSET_OFF", noMaskScaleOffset && !noMask);
 		EnableKeyword(mat, "_COLOR_OFF", noColor);
 
-		RenderingMode renderingMode = (RenderingMode)mat.GetInt("_RenderingMode");
+		RenderingMode renderingMode = (RenderingMode)mat.GetInt(RenderingModePropName);
 
 		switch (renderingMode)
 		{
 			case RenderingMode.Opaque:
 				mat.SetOverrideTag("RenderType", "");
-				mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-				mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
-				mat.SetInt("_ZWrite", 1);
+				mat.SetInt(SrcBlendPropName, (int)UnityEngine.Rendering.BlendMode.One);
+				mat.SetInt(DstBlendPropName, (int)UnityEngine.Rendering.BlendMode.Zero);
+				mat.SetInt(ZWritePropName, 1);
 				EnableKeyword(mat, "_ALPHATEST_ON", false);
 				mat.renderQueue = -1;
 				break;
 
 			case RenderingMode.Cutout:
 				mat.SetOverrideTag("RenderType", "TransparentCutout");
-				mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-				mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
-				mat.SetInt("_ZWrite", 1);
+				mat.SetInt(SrcBlendPropName, (int)UnityEngine.Rendering.BlendMode.One);
+				mat.SetInt(DstBlendPropName, (int)UnityEngine.Rendering.BlendMode.Zero);
+				mat.SetInt(ZWritePropName, 1);
 				EnableKeyword(mat, "_ALPHATEST_ON", true);
 				mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
 				break;
 
 			case RenderingMode.Transparent:
 				mat.SetOverrideTag("RenderType", "Transparent");
-				mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-				mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-				mat.SetInt("_ZWrite", 0);
+				mat.SetInt(SrcBlendPropName, (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+				mat.SetInt(DstBlendPropName, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+				mat.SetInt(ZWritePropName, 0);
 				EnableKeyword(mat, "_ALPHATEST_ON", false);
 				mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
 				break;
