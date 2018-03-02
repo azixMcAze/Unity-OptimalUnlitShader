@@ -50,7 +50,7 @@ public class UnlitShaderGUI : ShaderGUI
 		if(!m_firstTime)
 		{
 			m_firstTime = true;
-			
+
 			foreach(Material material in materialEditor.targets)
 				MaterialChanged(material);
 		}
@@ -77,19 +77,21 @@ public class UnlitShaderGUI : ShaderGUI
 		bool noMaskScaleOffset = GetMaterialFlag(materialFlags, MaterialFlags.NoMaskScaleOffset);
 
 		MaterialProperty maskProp = FindProperty(MaskPropName, properties);
-		bool maskScaleOffset = !noMaskScaleOffset;
+		bool maskScaleOffset = !noMaskScaleOffset || materialFlagesProp.hasMixedValue;
 		materialEditor.TextureProperty(maskProp, maskProp.displayName, maskScaleOffset);
 
+		EditorGUI.showMixedValue = materialFlagesProp.hasMixedValue;
 		noMaskScaleOffset = EditorGUILayout.Toggle(s_noMaskScaleOffsetLabel, noMaskScaleOffset);
+		EditorGUI.showMixedValue = false;
 		materialFlags = SetMaterialFlag(materialFlags, MaterialFlags.NoMaskScaleOffset, noMaskScaleOffset);
 
 		DrawProperty(ColorPropName, materialEditor, properties);
 
-		if((RenderingMode)renderingModeProp.floatValue == RenderingMode.Cutout)
+		if((RenderingMode)renderingModeProp.floatValue == RenderingMode.Cutout && !renderingModeProp.hasMixedValue)
 			DrawProperty(CutoffPropName, materialEditor, properties);
 
 		bool advancedToggle = GetMaterialFlag(materialFlags, MaterialFlags.AdvancedToggle);
-		advancedToggle = EditorGUILayout.Foldout(advancedToggle, s_advancedLabel);
+		advancedToggle = EditorGUILayout.Foldout(advancedToggle && !materialFlagesProp.hasMixedValue, s_advancedLabel);
 		materialFlags = SetMaterialFlag(materialFlags, MaterialFlags.AdvancedToggle, advancedToggle);
 		
 		if(advancedToggle)
@@ -103,7 +105,8 @@ public class UnlitShaderGUI : ShaderGUI
 			EditorGUI.indentLevel--;
 		}
 
-		materialFlagesProp.floatValue = (float)materialFlags;
+		if(!materialFlagesProp.hasMixedValue)
+			materialFlagesProp.floatValue = (float)materialFlags;
 
 		EditorGUILayout.Space();
 		EditorGUILayout.Space();
