@@ -110,7 +110,8 @@ public class UnlitShaderGUI : ShaderGUI
 				mat.SetInt(SrcBlendPropName, (int)UnityEngine.Rendering.BlendMode.One);
 				mat.SetInt(DstBlendPropName, (int)UnityEngine.Rendering.BlendMode.Zero);
 				mat.SetInt(ZWritePropName, 1);
-				EnableKeyword(mat, "_ALPHATEST_ON", true);
+				bool alphaTest = mat.GetFloat(CutoffPropName) > 0f;
+				EnableKeyword(mat, "_ALPHATEST_ON", alphaTest);
 				mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
 				break;
 
