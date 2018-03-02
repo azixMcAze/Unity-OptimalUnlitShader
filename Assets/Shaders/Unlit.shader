@@ -83,7 +83,7 @@
 			{
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
-			#if !defined(_TEXTURE_OFF) || !defined(_MASK_OFF)
+			#if defined(UV1_TEXCOORD)
 				o.uv1 = TRANSFORM_TEX(v.uv1, UV1_SCALE_OFFSET);
 			#endif
 				UNITY_TRANSFER_FOG(o,o.vertex);
