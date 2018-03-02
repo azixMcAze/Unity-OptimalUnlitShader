@@ -5,7 +5,7 @@ An unlit über-shader covering all the common use cases
 - [x] Optional texture 
 - [x] Optional color
 - [x] Optional mask
-- [ ] Optional mask texture tiling and offset
+- [x] Optional mask texture tiling and offset
 - [x] Opaque / Transparent / AlphaTest
 - [x] Unused features disabled throught shader keywords
 - [x] Shader keywords automatically enabled by a custom GUI
