@@ -12,6 +12,12 @@ public class UnlitShaderGUI : ShaderGUI
 		Transparent = 2,
 	}
 
+	[System.Flags]
+	public enum MaterialFlags
+	{
+		NoMaskScaleOffset = 1 << 0,
+	}
+
 	public const string RenderingModePropName = "_RenderingMode";
 	public const string MainTexPropName = "_MainTex";
 	public const string MaskPropName = "_Mask";
@@ -20,6 +26,7 @@ public class UnlitShaderGUI : ShaderGUI
 	public const string SrcBlendPropName = "_SrcBlend";
 	public const string DstBlendPropName = "_DstBlend";
 	public const string ZWritePropName = "_ZWrite";
+	public const string MaterialFlagsPropName = "_MaterialFlags";
 
 	bool m_firstTime = false;
 
@@ -45,15 +52,25 @@ public class UnlitShaderGUI : ShaderGUI
 	{
 		materialEditor.SetDefaultGUIWidths();
 
+		MaterialProperty materialFlagesProp = FindProperty(MaterialFlagsPropName, properties);
+		MaterialFlags materialFlags = (MaterialFlags)materialFlagesProp.floatValue;
+
 		MaterialProperty renderingModeProp = FindProperty(RenderingModePropName, properties);
 		materialEditor.ShaderProperty(renderingModeProp, renderingModeProp.displayName);
 
 		MaterialProperty mainTexProp = FindProperty(MainTexPropName, properties);
 		materialEditor.ShaderProperty(mainTexProp, mainTexProp.displayName);
 
+		bool noMaskScaleOffset = GetMaterialFlag(materialFlags, MaterialFlags.NoMaskScaleOffset);
+
 		MaterialProperty maskProp = FindProperty(MaskPropName, properties);
-		bool maskScaleOffset = true;
+		bool maskScaleOffset = !noMaskScaleOffset;
 		materialEditor.TextureProperty(maskProp, maskProp.displayName, maskScaleOffset);
+		if(noMaskScaleOffset)
+			maskProp.textureScaleAndOffset = mainTexProp.textureScaleAndOffset;
+
+		noMaskScaleOffset = EditorGUILayout.Toggle("Same Scale/Offet as Main Texture", noMaskScaleOffset);
+		materialFlags = SetMaterialFlag(materialFlags, MaterialFlags.NoMaskScaleOffset, noMaskScaleOffset);
 
 		MaterialProperty colorProp = FindProperty(ColorPropName, properties);
 		materialEditor.ShaderProperty(colorProp, colorProp.displayName);
@@ -63,6 +80,8 @@ public class UnlitShaderGUI : ShaderGUI
 			MaterialProperty cutoffProp = FindProperty(CutoffPropName, properties);
 			materialEditor.ShaderProperty(cutoffProp, cutoffProp.displayName);
 		}
+
+		materialFlagesProp.floatValue = (float)materialFlags;
 
 		EditorGUILayout.Space();
 		EditorGUILayout.Space();
@@ -124,6 +143,19 @@ public class UnlitShaderGUI : ShaderGUI
 				mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
 				break;
 		}
+	}
+
+	static bool GetMaterialFlag(MaterialFlags allFlags, MaterialFlags flag)
+	{
+		return (allFlags & flag) != 0;
+	}
+
+	static MaterialFlags SetMaterialFlag(MaterialFlags allFlags, MaterialFlags flag, bool enable)
+	{
+		if(enable)
+			return allFlags | flag;
+		else
+			return allFlags & ~flag;
 	}
 
 	static void EnableKeyword(Material material, string keyword, bool enable)

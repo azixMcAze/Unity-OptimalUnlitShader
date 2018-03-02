@@ -12,6 +12,8 @@
 		[HideInInspector] _SrcBlend ("__src", Float) = 1.0
 		[HideInInspector] _DstBlend ("__dst", Float) = 0.0
 		[HideInInspector] _ZWrite ("__zw", Float) = 1.0
+
+		[HideInInspector] _MaterialFlags ("__flags", Float) = 1.0
 	}
 	SubShader
 	{
@@ -74,7 +76,7 @@
 				#define MASK_UV uv1
 
 				#define FOG_TEXCOORD 1
-				
+
 			#else
 				#define FOG_TEXCOORD 0
 			#endif
