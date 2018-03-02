@@ -66,8 +66,6 @@ public class UnlitShaderGUI : ShaderGUI
 		MaterialProperty maskProp = FindProperty(MaskPropName, properties);
 		bool maskScaleOffset = !noMaskScaleOffset;
 		materialEditor.TextureProperty(maskProp, maskProp.displayName, maskScaleOffset);
-		if(noMaskScaleOffset)
-			maskProp.textureScaleAndOffset = mainTexProp.textureScaleAndOffset;
 
 		noMaskScaleOffset = EditorGUILayout.Toggle("Same Scale/Offet as Main Texture", noMaskScaleOffset);
 		materialFlags = SetMaterialFlag(materialFlags, MaterialFlags.NoMaskScaleOffset, noMaskScaleOffset);
@@ -92,18 +90,21 @@ public class UnlitShaderGUI : ShaderGUI
 
 	void MaterialChanged(Material mat)
 	{
+		MaterialFlags materialFlags = (MaterialFlags)mat.GetInt(MaterialFlagsPropName);
+		
 		bool noTexture = mat.GetTexture(MainTexPropName) == null;
 		Vector2 textureScale = noTexture ? Vector2.one : mat.GetTextureScale(MainTexPropName);
-        Vector2 textureOffset = noTexture ? Vector2.zero : mat.GetTextureOffset(MainTexPropName);
+		Vector2 textureOffset = noTexture ? Vector2.zero : mat.GetTextureOffset(MainTexPropName);
 		bool noTextureScale = textureScale == Vector2.one;
-        bool noTextureOffset = textureOffset == Vector2.zero;
-        bool noTextureScaleOffset = noTextureScale && noTextureOffset;
+		bool noTextureOffset = textureOffset == Vector2.zero;
+		bool noTextureScaleOffset = noTextureScale && noTextureOffset;
 		bool noMask = mat.GetTexture(MaskPropName) == null;
 		Vector2 maskScale = mat.GetTextureScale(MaskPropName);
-        Vector2 maskOffset = mat.GetTextureOffset(MaskPropName);
+		Vector2 maskOffset = mat.GetTextureOffset(MaskPropName);
 		bool noMaskScale = maskScale == textureScale;
 		bool noMaskOffset = maskOffset == textureOffset;
-        bool noMaskScaleOffset = noMaskScale && noMaskOffset;
+		bool noMaskScaleOffsetFlag = GetMaterialFlag(materialFlags, MaterialFlags.NoMaskScaleOffset);
+		bool noMaskScaleOffset = noMaskScaleOffsetFlag || noMaskScale && noMaskOffset;
 		bool noColor = mat.GetColor(ColorPropName) == Color.white;
 		EnableKeyword(mat, "_TEXTURE_OFF", noTexture);
 		EnableKeyword(mat, "_TEXTURE_SCALE_OFFSET_OFF", noTextureScaleOffset && !noTexture);
