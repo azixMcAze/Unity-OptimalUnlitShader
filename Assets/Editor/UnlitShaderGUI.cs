@@ -28,6 +28,8 @@ public class UnlitShaderGUI : ShaderGUI
 	public const string ZWritePropName = "_ZWrite";
 	public const string MaterialFlagsPropName = "_MaterialFlags";
 
+	static readonly GUIContent s_noMaskScaleOffsetLabel = new GUIContent("Same Tiling/Offset as Texture");
+
 	bool m_firstTime = false;
 
 	public override void OnGUI (MaterialEditor materialEditor, MaterialProperty[] properties)
@@ -67,7 +69,7 @@ public class UnlitShaderGUI : ShaderGUI
 		bool maskScaleOffset = !noMaskScaleOffset;
 		materialEditor.TextureProperty(maskProp, maskProp.displayName, maskScaleOffset);
 
-		noMaskScaleOffset = EditorGUILayout.Toggle("Same Scale/Offet as Main Texture", noMaskScaleOffset);
+		noMaskScaleOffset = EditorGUILayout.Toggle(s_noMaskScaleOffsetLabel, noMaskScaleOffset);
 		materialFlags = SetMaterialFlag(materialFlags, MaterialFlags.NoMaskScaleOffset, noMaskScaleOffset);
 
 		MaterialProperty colorProp = FindProperty(ColorPropName, properties);
