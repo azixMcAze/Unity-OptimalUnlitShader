@@ -4,7 +4,7 @@ An unlit über-shader covering all the common use cases
 ## Features
 - [x] Optional texture 
 - [x] Optional color
-- [ ] Optional mask
+- [x] Optional mask
 - [ ] Optional mask texture tiling and offset
 - [x] Opaque / Transparent / AlphaTest
 - [x] Unused features disabled throught shader keywords
