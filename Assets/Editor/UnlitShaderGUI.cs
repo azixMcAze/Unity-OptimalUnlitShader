@@ -25,11 +25,41 @@ public class UnlitShaderGUI : ShaderGUI
 		}
 
 		EditorGUI.BeginChangeCheck();
-		base.OnGUI (materialEditor, properties);
+		DrawProperties (materialEditor, properties);
 		if (EditorGUI.EndChangeCheck())
 		{
 			MaterialChanged(materialEditor.target as Material);
 		}
+	}
+
+	void DrawProperties(MaterialEditor materialEditor, MaterialProperty[] properties)
+	{
+		materialEditor.SetDefaultGUIWidths();
+
+		MaterialProperty renderingModeProp = FindProperty("_RenderingMode", properties);
+		materialEditor.ShaderProperty(renderingModeProp, renderingModeProp.displayName);
+
+		MaterialProperty mainTexProp = FindProperty("_MainTex", properties);
+		materialEditor.ShaderProperty(mainTexProp, mainTexProp.displayName);
+
+		MaterialProperty maskProp = FindProperty("_Mask", properties);
+		bool maskScaleOffset = true;
+		materialEditor.TextureProperty(maskProp, maskProp.displayName, maskScaleOffset);
+
+		MaterialProperty colorProp = FindProperty("_Color", properties);
+		materialEditor.ShaderProperty(colorProp, colorProp.displayName);
+
+		if((RenderingMode)renderingModeProp.floatValue == RenderingMode.Cutout)
+		{
+			MaterialProperty cutoffProp = FindProperty("_Cutoff", properties);
+			materialEditor.ShaderProperty(cutoffProp, cutoffProp.displayName);
+		}
+
+		EditorGUILayout.Space();
+		EditorGUILayout.Space();
+		materialEditor.RenderQueueField();
+		materialEditor.EnableInstancingField();
+		materialEditor.DoubleSidedGIField();
 	}
 
 	void MaterialChanged(Material mat)
