@@ -13,7 +13,7 @@
 		[HideInInspector] _DstBlend ("__dst", Float) = 0.0
 		[HideInInspector] _ZWrite ("__zw", Float) = 1.0
 
-		[HideInInspector] _MaterialFlags ("__flags", Float) = 1.0
+		[HideInInspector] _MaterialFlags ("__flags", Float) = 0
 	}
 	SubShader
 	{
