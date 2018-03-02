@@ -30,7 +30,7 @@
 			#pragma fragment frag
 			// make fog work
 			#pragma multi_compile_fog
-			#pragma shader_feature _ _TEXTURE_SCALE_OFFSET_OFF _TEXTURE_OFF
+			#pragma shader_feature _ _TEXTURE_OFF
 			#pragma shader_feature _ _MASK_SCALE_OFFSET_OFF _MASK_OFF
 			#pragma shader_feature _ _COLOR_OFF
 			#pragma shader_feature _ _ALPHATEST_ON
@@ -41,9 +41,7 @@
 			#if !defined(_TEXTURE_OFF) && !defined(_MASK_OFF)
 
 				#define UV1_TEXCOORD
-				#if !defined(_TEXTURE_SCALE_OFFSET_OFF)
-					#define UV1_SCALE_OFFSET _MainTex
-				#endif
+				#define UV1_SCALE_OFFSET _MainTex
 				#define MAINTEX_UV uv1
 
 				#if !defined(_MASK_SCALE_OFFSET_OFF)
@@ -60,9 +58,7 @@
 			#elif !defined(_TEXTURE_OFF)
 
 				#define UV1_TEXCOORD
-				#if !defined(_TEXTURE_SCALE_OFFSET_OFF)
-					#define UV1_SCALE_OFFSET _MainTex
-				#endif
+				#define UV1_SCALE_OFFSET _MainTex
 				#define MAINTEX_UV uv1
 
 				#define FOG_TEXCOORD 1
@@ -72,6 +68,8 @@
 				#define UV1_TEXCOORD
 				#if !defined(_MASK_SCALE_OFFSET_OFF)
 					#define UV1_SCALE_OFFSET _Mask
+				#else
+					#define UV1_SCALE_OFFSET _MainTex
 				#endif
 				#define MASK_UV uv1
 
@@ -125,18 +123,10 @@
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
 			#if defined(UV1_TEXCOORD)
-				#if defined(UV1_SCALE_OFFSET)
-					o.uv1 = TRANSFORM_TEX(v.uv, UV1_SCALE_OFFSET);
-				#else
-					o.uv1 = v.uv;
-				#endif
+				o.uv1 = TRANSFORM_TEX(v.uv, UV1_SCALE_OFFSET);
 			#endif
 			#if defined(UV2_TEXCOORD)
-				#if defined(UV2_SCALE_OFFSET)
-					o.uv2 = TRANSFORM_TEX(v.uv, UV2_SCALE_OFFSET);
-				#else
-					o.uv2 = v.uv;
-				#endif
+				o.uv2 = TRANSFORM_TEX(v.uv, UV2_SCALE_OFFSET);
 			#endif
 				UNITY_TRANSFER_FOG(o,o.vertex);
 				return o;

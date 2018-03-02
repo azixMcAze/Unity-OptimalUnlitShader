@@ -95,21 +95,17 @@ public class UnlitShaderGUI : ShaderGUI
 		MaterialFlags materialFlags = (MaterialFlags)mat.GetInt(MaterialFlagsPropName);
 		
 		bool noTexture = mat.GetTexture(MainTexPropName) == null;
-		Vector2 textureScale = noTexture ? Vector2.one : mat.GetTextureScale(MainTexPropName);
-		Vector2 textureOffset = noTexture ? Vector2.zero : mat.GetTextureOffset(MainTexPropName);
-		bool noTextureScale = textureScale == Vector2.one;
-		bool noTextureOffset = textureOffset == Vector2.zero;
-		bool noTextureScaleOffset = noTextureScale && noTextureOffset;
+		Vector2 textureScale = mat.GetTextureScale(MainTexPropName);
+		Vector2 textureOffset = mat.GetTextureOffset(MainTexPropName);
 		bool noMask = mat.GetTexture(MaskPropName) == null;
 		Vector2 maskScale = mat.GetTextureScale(MaskPropName);
 		Vector2 maskOffset = mat.GetTextureOffset(MaskPropName);
-		bool noMaskScale = maskScale == textureScale;
-		bool noMaskOffset = maskOffset == textureOffset;
+		bool sameMaskScale = maskScale == textureScale;
+		bool sameMaskOffset = maskOffset == textureOffset;
 		bool noMaskScaleOffsetFlag = GetMaterialFlag(materialFlags, MaterialFlags.NoMaskScaleOffset);
-		bool noMaskScaleOffset = noMaskScaleOffsetFlag || noMaskScale && noMaskOffset;
+		bool noMaskScaleOffset = noMaskScaleOffsetFlag || sameMaskScale && sameMaskOffset;
 		bool noColor = mat.GetColor(ColorPropName) == Color.white;
 		EnableKeyword(mat, "_TEXTURE_OFF", noTexture);
-		EnableKeyword(mat, "_TEXTURE_SCALE_OFFSET_OFF", noTextureScaleOffset && !noTexture);
 		EnableKeyword(mat, "_MASK_OFF", noMask);
 		EnableKeyword(mat, "_MASK_SCALE_OFFSET_OFF", noMaskScaleOffset && !noMask);
 		EnableKeyword(mat, "_COLOR_OFF", noColor);
