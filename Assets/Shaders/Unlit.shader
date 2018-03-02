@@ -58,6 +58,8 @@
 				#define MASK_UV uv1
 
 				#define FOG_TEXCOORD 1
+			#else
+				#define FOG_TEXCOORD 0
 			#endif
 
 			struct appdata
