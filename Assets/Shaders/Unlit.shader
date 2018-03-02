@@ -50,7 +50,7 @@
 			{
 				float4 vertex : POSITION;
 			#if defined(UV1_TEXCOORD)
-				float2 uv1 : UV1_TEXCOORD;
+				float2 uv : TEXCOORD0;
 			#endif
 			};
 
@@ -84,7 +84,7 @@
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
 			#if defined(UV1_TEXCOORD)
-				o.uv1 = TRANSFORM_TEX(v.uv1, UV1_SCALE_OFFSET);
+				o.uv1 = TRANSFORM_TEX(v.uv, UV1_SCALE_OFFSET);
 			#endif
 				UNITY_TRANSFER_FOG(o,o.vertex);
 				return o;
