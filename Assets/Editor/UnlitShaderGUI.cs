@@ -47,19 +47,20 @@ public class UnlitShaderGUI : ShaderGUI
 
 	public override void OnGUI (MaterialEditor materialEditor, MaterialProperty[] properties)
 	{
-		Material mat = materialEditor.target as Material;
-
 		if(!m_firstTime)
 		{
 			m_firstTime = true;
-			MaterialChanged(mat);
+			
+			foreach(Material material in materialEditor.targets)
+				MaterialChanged(material);
 		}
 
 		EditorGUI.BeginChangeCheck();
 		DrawProperties (materialEditor, properties);
 		if (EditorGUI.EndChangeCheck())
 		{
-			MaterialChanged(materialEditor.target as Material);
+			foreach(Material material in materialEditor.targets)
+				MaterialChanged(material);
 		}
 	}
 
