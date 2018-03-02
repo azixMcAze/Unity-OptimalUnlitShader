@@ -50,18 +50,15 @@ public class UnlitShaderGUI : ShaderGUI
 		}
 	}
 
-	void DrawProperties(MaterialEditor materialEditor, MaterialProperty[] properties)
+	static void DrawProperties(MaterialEditor materialEditor, MaterialProperty[] properties)
 	{
 		materialEditor.SetDefaultGUIWidths();
 
 		MaterialProperty materialFlagesProp = FindProperty(MaterialFlagsPropName, properties);
 		MaterialFlags materialFlags = (MaterialFlags)materialFlagesProp.floatValue;
 
-		MaterialProperty renderingModeProp = FindProperty(RenderingModePropName, properties);
-		materialEditor.ShaderProperty(renderingModeProp, renderingModeProp.displayName);
-
-		MaterialProperty mainTexProp = FindProperty(MainTexPropName, properties);
-		materialEditor.ShaderProperty(mainTexProp, mainTexProp.displayName);
+		MaterialProperty renderingModeProp = DrawProperty(RenderingModePropName, materialEditor, properties);
+		DrawProperty(MainTexPropName, materialEditor, properties);
 
 		bool noMaskScaleOffset = GetMaterialFlag(materialFlags, MaterialFlags.NoMaskScaleOffset);
 
@@ -72,14 +69,10 @@ public class UnlitShaderGUI : ShaderGUI
 		noMaskScaleOffset = EditorGUILayout.Toggle(s_noMaskScaleOffsetLabel, noMaskScaleOffset);
 		materialFlags = SetMaterialFlag(materialFlags, MaterialFlags.NoMaskScaleOffset, noMaskScaleOffset);
 
-		MaterialProperty colorProp = FindProperty(ColorPropName, properties);
-		materialEditor.ShaderProperty(colorProp, colorProp.displayName);
+		DrawProperty(ColorPropName, materialEditor, properties);
 
 		if((RenderingMode)renderingModeProp.floatValue == RenderingMode.Cutout)
-		{
-			MaterialProperty cutoffProp = FindProperty(CutoffPropName, properties);
-			materialEditor.ShaderProperty(cutoffProp, cutoffProp.displayName);
-		}
+			DrawProperty(CutoffPropName, materialEditor, properties);
 
 		materialFlagesProp.floatValue = (float)materialFlags;
 
@@ -88,6 +81,13 @@ public class UnlitShaderGUI : ShaderGUI
 		materialEditor.RenderQueueField();
 		materialEditor.EnableInstancingField();
 		materialEditor.DoubleSidedGIField();
+	}
+
+	static MaterialProperty DrawProperty(string propertyName, MaterialEditor materialEditor, MaterialProperty[] properties)
+	{
+		MaterialProperty property = FindProperty(propertyName, properties);
+		materialEditor.ShaderProperty(property, property.displayName);
+		return property;
 	}
 
 	void MaterialChanged(Material mat)
