@@ -37,27 +37,27 @@
 			#define CONCAT(A, B) A ## B
 
 			#if !defined(_TEXTURE_OFF) || !defined(_MASK_OFF)
-				#define UV_TEXCOORD TEXCOORD0
+				#define UV1_TEXCOORD TEXCOORD0
 				#define FOG_TEXCOORD 1
 				#if !defined(_TEXTURE_OFF)
-					#define UV_SCALE_OFFSET _MainTex
+					#define UV1_SCALE_OFFSET _MainTex
 				#else
-					#define UV_SCALE_OFFSET _Mask
+					#define UV1_SCALE_OFFSET _Mask
 				#endif
 			#endif
 
 			struct appdata
 			{
 				float4 vertex : POSITION;
-			#if defined(UV_TEXCOORD)
-				float2 uv : UV_TEXCOORD;
+			#if defined(UV1_TEXCOORD)
+				float2 uv1 : UV1_TEXCOORD;
 			#endif
 			};
 
 			struct v2f
 			{
-			#if defined(UV_TEXCOORD)
-				float2 uv : UV_TEXCOORD;
+			#if defined(UV1_TEXCOORD)
+				float2 uv1 : UV1_TEXCOORD;
 			#endif
 				UNITY_FOG_COORDS(FOG_TEXCOORD)
 				float4 vertex : SV_POSITION;
@@ -66,8 +66,8 @@
 		#if !defined(_TEXTURE_OFF)
 			sampler2D _MainTex;
 		#endif
-		#if defined(UV_SCALE_OFFSET)
-			float4 CONCAT(UV_SCALE_OFFSET, _ST);
+		#if defined(UV1_SCALE_OFFSET)
+			float4 CONCAT(UV1_SCALE_OFFSET, _ST);
 		#endif
 		#if !defined(_MASK_OFF)
 			sampler2D _Mask;
@@ -84,7 +84,7 @@
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
 			#if !defined(_TEXTURE_OFF) || !defined(_MASK_OFF)
-				o.uv = TRANSFORM_TEX(v.uv, UV_SCALE_OFFSET);
+				o.uv1 = TRANSFORM_TEX(v.uv1, UV1_SCALE_OFFSET);
 			#endif
 				UNITY_TRANSFER_FOG(o,o.vertex);
 				return o;
@@ -95,10 +95,10 @@
 				// sample the texture
 				fixed4 col = 1;
 			#if !defined(_TEXTURE_OFF)
-				col *= tex2D(_MainTex, i.uv);
+				col *= tex2D(_MainTex, i.uv1);
 			#endif
 			#if !defined(_MASK_OFF)
-				col.a *= tex2D(_Mask, i.uv).a;
+				col.a *= tex2D(_Mask, i.uv1).a;
 			#endif
 			#if !defined(_COLOR_OFF)
 				col *= _Color;
