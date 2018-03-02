@@ -130,12 +130,16 @@ public class UnlitShaderGUI : ShaderGUI
 	{
 		MaterialFlags materialFlags = (MaterialFlags)mat.GetInt(MaterialFlagsPropName);
 		
-		bool forceTextureFlag = GetMaterialFlag(materialFlags, MaterialFlags.ForceTexture);
 		bool noTexture = mat.GetTexture(MainTexPropName) == null;
+		bool forceTextureFlag = GetMaterialFlag(materialFlags, MaterialFlags.ForceTexture);
+		EnableKeyword(mat, "_TEXTURE_OFF", noTexture && !forceTextureFlag);
+
 		Vector2 textureScale = mat.GetTextureScale(MainTexPropName);
 		Vector2 textureOffset = mat.GetTextureOffset(MainTexPropName);
 		bool noMask = mat.GetTexture(MaskPropName) == null;
 		bool forceMaskFlag = GetMaterialFlag(materialFlags, MaterialFlags.ForceMask);
+		EnableKeyword(mat, "_MASK_OFF", noMask && !forceMaskFlag);
+
 		Vector2 maskScale = mat.GetTextureScale(MaskPropName);
 		Vector2 maskOffset = mat.GetTextureOffset(MaskPropName);
 		bool sameMaskScale = maskScale == textureScale;
@@ -143,11 +147,10 @@ public class UnlitShaderGUI : ShaderGUI
 		bool noMaskScaleOffsetFlag = GetMaterialFlag(materialFlags, MaterialFlags.NoMaskScaleOffset);
 		bool forceMaskScaleOffsetFlag = GetMaterialFlag(materialFlags, MaterialFlags.ForceMaskScaleOffset);
 		bool noMaskScaleOffset = noMaskScaleOffsetFlag || sameMaskScale && sameMaskOffset;
+		EnableKeyword(mat, "_MASK_SCALE_OFFSET_OFF", noMaskScaleOffset && !noMask && !forceMaskScaleOffsetFlag);
+		
 		bool noColor = mat.GetColor(ColorPropName) == Color.white;
 		bool forceColorFlag = GetMaterialFlag(materialFlags, MaterialFlags.ForceColor);
-		EnableKeyword(mat, "_TEXTURE_OFF", noTexture && !forceTextureFlag);
-		EnableKeyword(mat, "_MASK_OFF", noMask && !forceMaskFlag);
-		EnableKeyword(mat, "_MASK_SCALE_OFFSET_OFF", noMaskScaleOffset && !noMask && !forceMaskScaleOffsetFlag);
 		EnableKeyword(mat, "_COLOR_OFF", noColor && !forceColorFlag);
 
 		RenderingMode renderingMode = (RenderingMode)mat.GetInt(RenderingModePropName);
