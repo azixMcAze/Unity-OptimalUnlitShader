@@ -36,20 +36,34 @@
 
 			#define CONCAT(A, B) A ## B
 
-			#if !defined(_TEXTURE_OFF) || !defined(_MASK_OFF)
-				#define UV1_TEXCOORD TEXCOORD0
+			#if !defined(_TEXTURE_OFF) && !defined(_MASK_OFF)
+				#define UV1_TEXCOORD
+				#define UV1_SCALE_OFFSET _MainTex
+				#define MAINTEX_UV uv1
+				
+				#define UV2_TEXCOORD
+				#define UV2_SCALE_OFFSET _Mask
+				#define MASK_UV uv2
+
+				#define FOG_TEXCOORD 2
+			#elif !defined(_TEXTURE_OFF)
+				#define UV1_TEXCOORD
+				#define UV1_SCALE_OFFSET _MainTex
+				#define MAINTEX_UV uv1
+
 				#define FOG_TEXCOORD 1
-				#if !defined(_TEXTURE_OFF)
-					#define UV1_SCALE_OFFSET _MainTex
-				#else
-					#define UV1_SCALE_OFFSET _Mask
-				#endif
+			#elif !defined(_MASK_OFF)
+				#define UV1_TEXCOORD
+				#define UV1_SCALE_OFFSET _Mask
+				#define MASK_UV uv1
+
+				#define FOG_TEXCOORD 1
 			#endif
 
 			struct appdata
 			{
 				float4 vertex : POSITION;
-			#if defined(UV1_TEXCOORD)
+			#if defined(UV1_TEXCOORD) || defined(UV2_TEXCOORD)
 				float2 uv : TEXCOORD0;
 			#endif
 			};
@@ -57,7 +71,10 @@
 			struct v2f
 			{
 			#if defined(UV1_TEXCOORD)
-				float2 uv1 : UV1_TEXCOORD;
+				float2 uv1 : TEXCOORD0;
+			#endif
+			#if defined(UV2_TEXCOORD)
+				float2 uv2 : TEXCOORD1;
 			#endif
 				UNITY_FOG_COORDS(FOG_TEXCOORD)
 				float4 vertex : SV_POSITION;
@@ -71,6 +88,9 @@
 		#endif
 		#if !defined(_MASK_OFF)
 			sampler2D _Mask;
+		#endif
+		#if defined(UV2_SCALE_OFFSET)
+			float4 CONCAT(UV2_SCALE_OFFSET, _ST);
 		#endif
 		#if !defined(_COLOR_OFF)
 			fixed4 _Color;
@@ -86,6 +106,9 @@
 			#if defined(UV1_TEXCOORD)
 				o.uv1 = TRANSFORM_TEX(v.uv, UV1_SCALE_OFFSET);
 			#endif
+			#if defined(UV2_TEXCOORD)
+				o.uv2 = TRANSFORM_TEX(v.uv, UV2_SCALE_OFFSET);
+			#endif
 				UNITY_TRANSFER_FOG(o,o.vertex);
 				return o;
 			}
@@ -95,10 +118,10 @@
 				// sample the texture
 				fixed4 col = 1;
 			#if !defined(_TEXTURE_OFF)
-				col *= tex2D(_MainTex, i.uv1);
+				col *= tex2D(_MainTex, i.MAINTEX_UV);
 			#endif
 			#if !defined(_MASK_OFF)
-				col.a *= tex2D(_Mask, i.uv1).a;
+				col.a *= tex2D(_Mask, i.MASK_UV).a;
 			#endif
 			#if !defined(_COLOR_OFF)
 				col *= _Color;
