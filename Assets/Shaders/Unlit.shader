@@ -28,8 +28,8 @@
 			#pragma fragment frag
 			// make fog work
 			#pragma multi_compile_fog
-			#pragma shader_feature _ _TEXTURE_OFF
-			#pragma shader_feature _ _MASK_OFF
+			#pragma shader_feature _ _TEXTURE_SCALE_OFFSET_OFF _TEXTURE_OFF
+			#pragma shader_feature _ _MASK_SCALE_OFFSET_OFF _MASK_OFF
 			#pragma shader_feature _ _COLOR_OFF
 			#pragma shader_feature _ _ALPHATEST_ON
 			#include "UnityCG.cginc"
@@ -37,27 +37,44 @@
 			#define CONCAT(A, B) A ## B
 
 			#if !defined(_TEXTURE_OFF) && !defined(_MASK_OFF)
-				#define UV1_TEXCOORD
-				#define UV1_SCALE_OFFSET _MainTex
-				#define MAINTEX_UV uv1
-				
-				#define UV2_TEXCOORD
-				#define UV2_SCALE_OFFSET _Mask
-				#define MASK_UV uv2
 
-				#define FOG_TEXCOORD 2
-			#elif !defined(_TEXTURE_OFF)
 				#define UV1_TEXCOORD
-				#define UV1_SCALE_OFFSET _MainTex
+				#if !defined(_TEXTURE_SCALE_OFFSET_OFF)
+					#define UV1_SCALE_OFFSET _MainTex
+				#endif
+				#define MAINTEX_UV uv1
+
+				#if !defined(_MASK_SCALE_OFFSET_OFF)
+					#define UV2_TEXCOORD
+					#define UV2_SCALE_OFFSET _Mask
+					#define MASK_UV uv2
+					#define FOG_TEXCOORD 2
+				#else
+					#define MASK_UV uv1
+
+					#define FOG_TEXCOORD 1
+				#endif
+
+			#elif !defined(_TEXTURE_OFF)
+
+				#define UV1_TEXCOORD
+				#if !defined(_TEXTURE_SCALE_OFFSET_OFF)
+					#define UV1_SCALE_OFFSET _MainTex
+				#endif
 				#define MAINTEX_UV uv1
 
 				#define FOG_TEXCOORD 1
+
 			#elif !defined(_MASK_OFF)
+
 				#define UV1_TEXCOORD
-				#define UV1_SCALE_OFFSET _Mask
+				#if !defined(_MASK_SCALE_OFFSET_OFF)
+					#define UV1_SCALE_OFFSET _Mask
+				#endif
 				#define MASK_UV uv1
 
 				#define FOG_TEXCOORD 1
+				
 			#else
 				#define FOG_TEXCOORD 0
 			#endif
@@ -106,10 +123,18 @@
 				v2f o;
 				o.vertex = UnityObjectToClipPos(v.vertex);
 			#if defined(UV1_TEXCOORD)
-				o.uv1 = TRANSFORM_TEX(v.uv, UV1_SCALE_OFFSET);
+				#if defined(UV1_SCALE_OFFSET)
+					o.uv1 = TRANSFORM_TEX(v.uv, UV1_SCALE_OFFSET);
+				#else
+					o.uv1 = v.uv;
+				#endif
 			#endif
 			#if defined(UV2_TEXCOORD)
-				o.uv2 = TRANSFORM_TEX(v.uv, UV2_SCALE_OFFSET);
+				#if defined(UV2_SCALE_OFFSET)
+					o.uv2 = TRANSFORM_TEX(v.uv, UV2_SCALE_OFFSET);
+				#else
+					o.uv2 = v.uv;
+				#endif
 			#endif
 				UNITY_TRANSFER_FOG(o,o.vertex);
 				return o;

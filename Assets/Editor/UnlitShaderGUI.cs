@@ -35,10 +35,22 @@ public class UnlitShaderGUI : ShaderGUI
 	void MaterialChanged(Material mat)
 	{
 		bool noTexture = mat.GetTexture("_MainTex") == null;
+		Vector2 textureScale = noTexture ? Vector2.one : mat.GetTextureScale("_MainTex");
+        Vector2 textureOffset = noTexture ? Vector2.zero : mat.GetTextureOffset("_MainTex");
+		bool noTextureScale = textureScale == Vector2.one;
+        bool noTextureOffset = textureOffset == Vector2.zero;
+        bool noTextureScaleOffset = noTextureScale && noTextureOffset;
 		bool noMask = mat.GetTexture("_Mask") == null;
+		Vector2 maskScale = mat.GetTextureScale("_Mask");
+        Vector2 maskOffset = mat.GetTextureOffset("_Mask");
+		bool noMaskScale = maskScale == textureScale;
+		bool noMaskOffset = maskOffset == textureOffset;
+        bool noMaskScaleOffset = noMaskScale && noMaskOffset;
 		bool noColor = mat.GetColor("_Color") == Color.white;
 		EnableKeyword(mat, "_TEXTURE_OFF", noTexture);
+		EnableKeyword(mat, "_TEXTURE_SCALE_OFFSET_OFF", noTextureScaleOffset && !noTexture);
 		EnableKeyword(mat, "_MASK_OFF", noMask);
+		EnableKeyword(mat, "_MASK_SCALE_OFFSET_OFF", noMaskScaleOffset && !noMask);
 		EnableKeyword(mat, "_COLOR_OFF", noColor);
 
 		RenderingMode renderingMode = (RenderingMode)mat.GetInt("_RenderingMode");
