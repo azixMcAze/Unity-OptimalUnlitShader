@@ -81,12 +81,10 @@ public class UnlitShaderGUI : ShaderGUI
 
 		bool noMaskScaleOffset = GetMaterialFlag(materialFlags, MaterialFlags.NoMaskScaleOffset);
 		bool mixedValueNoMaskScaleOffset = GetMaterialFlag(mixedValueMaterialFlags, MaterialFlags.NoMaskScaleOffset);
-		MaterialProperty maskProp = FindProperty(MaskPropName, properties);
 		bool maskScaleOffset = !noMaskScaleOffset || mixedValueNoMaskScaleOffset;
-		materialEditor.TextureProperty(maskProp, maskProp.displayName, maskScaleOffset);
-
+		DrawTexure(MaskPropName, maskScaleOffset, materialEditor, properties);
 		DrawFlagToggleProperty(s_noMaskScaleOffsetLabel, MaterialFlags.NoMaskScaleOffset, ref materialFlags, ref mixedValueMaterialFlags);
-
+		
 		DrawProperty(ColorPropName, materialEditor, properties);
 
 		if((RenderingMode)renderingModeProp.floatValue == RenderingMode.Cutout && !renderingModeProp.hasMixedValue)
@@ -124,6 +122,13 @@ public class UnlitShaderGUI : ShaderGUI
 	{
 		MaterialProperty property = FindProperty(propertyName, properties);
 		materialEditor.ShaderProperty(property, property.displayName);
+		return property;
+	}
+
+	static MaterialProperty DrawTexure(string propertyName, bool scaleOffset, MaterialEditor materialEditor, MaterialProperty[] properties)
+	{
+		MaterialProperty property = FindProperty(propertyName, properties);
+		materialEditor.TextureProperty(property, property.displayName, scaleOffset);
 		return property;
 	}
 
