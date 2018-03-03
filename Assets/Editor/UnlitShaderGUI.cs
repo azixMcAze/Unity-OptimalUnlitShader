@@ -15,6 +15,7 @@ public class UnlitShaderGUI : ShaderGUI
 	[System.Flags]
 	public enum MaterialFlags
 	{
+		None = 0,
 		NoMaskScaleOffset = 1 << 0,
 		AdvancedToggle = 1 << 1,
 		ForceTexture = 1 << 2,
@@ -194,7 +195,7 @@ public class UnlitShaderGUI : ShaderGUI
 
 	static bool GetMaterialFlag(MaterialFlags allFlags, MaterialFlags flag)
 	{
-		return (allFlags & flag) != 0;
+		return (allFlags & flag) != MaterialFlags.None;
 	}
 
 	static MaterialFlags SetMaterialFlag(MaterialFlags allFlags, MaterialFlags flag, bool enable)
