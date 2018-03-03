@@ -68,23 +68,24 @@ public class UnlitShaderGUI : ShaderGUI
 	static void DrawProperties(MaterialEditor materialEditor, MaterialProperty[] properties)
 	{
 		materialEditor.SetDefaultGUIWidths();
+		EditorGUI.BeginChangeCheck();
 
 		MaterialProperty materialFlagesProp = FindProperty(MaterialFlagsPropName, properties);
 		MaterialFlags materialFlags = (MaterialFlags)materialFlagesProp.floatValue;
+		MaterialFlags mixedValueMaterialFlags = MaterialFlags.None;
+		if(materialFlagesProp.hasMixedValue)
+			mixedValueMaterialFlags = GetMixedValueMaterialFlags(materialEditor);
 
 		MaterialProperty renderingModeProp = DrawProperty(RenderingModePropName, materialEditor, properties);
 		DrawProperty(MainTexPropName, materialEditor, properties);
 
 		bool noMaskScaleOffset = GetMaterialFlag(materialFlags, MaterialFlags.NoMaskScaleOffset);
-
+		bool mixedValueNoMaskScaleOffset = GetMaterialFlag(mixedValueMaterialFlags, MaterialFlags.NoMaskScaleOffset);
 		MaterialProperty maskProp = FindProperty(MaskPropName, properties);
-		bool maskScaleOffset = !noMaskScaleOffset || materialFlagesProp.hasMixedValue;
+		bool maskScaleOffset = !noMaskScaleOffset || mixedValueNoMaskScaleOffset;
 		materialEditor.TextureProperty(maskProp, maskProp.displayName, maskScaleOffset);
 
-		EditorGUI.showMixedValue = materialFlagesProp.hasMixedValue;
-		noMaskScaleOffset = EditorGUILayout.Toggle(s_noMaskScaleOffsetLabel, noMaskScaleOffset);
-		EditorGUI.showMixedValue = false;
-		materialFlags = SetMaterialFlag(materialFlags, MaterialFlags.NoMaskScaleOffset, noMaskScaleOffset);
+		DrawFlagToggleProperty(s_noMaskScaleOffsetLabel, MaterialFlags.NoMaskScaleOffset, ref materialFlags, ref mixedValueMaterialFlags);
 
 		DrawProperty(ColorPropName, materialEditor, properties);
 
@@ -92,22 +93,28 @@ public class UnlitShaderGUI : ShaderGUI
 			DrawProperty(CutoffPropName, materialEditor, properties);
 
 		bool advancedToggle = GetMaterialFlag(materialFlags, MaterialFlags.AdvancedToggle);
-		advancedToggle = EditorGUILayout.Foldout(advancedToggle && !materialFlagesProp.hasMixedValue, s_advancedLabel);
+		bool mixedValueAdvancedToggle = GetMaterialFlag(mixedValueMaterialFlags, MaterialFlags.AdvancedToggle);
+		advancedToggle = EditorGUILayout.Foldout(advancedToggle || mixedValueAdvancedToggle, s_advancedLabel);
 		materialFlags = SetMaterialFlag(materialFlags, MaterialFlags.AdvancedToggle, advancedToggle);
 		
 		if(advancedToggle)
 		{
 			EditorGUI.indentLevel++;
-			DrawFlagToggleProperty(s_forceTextureLabel, ref materialFlags, MaterialFlags.ForceTexture);
-			DrawFlagToggleProperty(s_forceMaskLabel, ref materialFlags, MaterialFlags.ForceMask);
-			DrawFlagToggleProperty(s_forceMaskScaleOffsetLabel, ref materialFlags, MaterialFlags.ForceMaskScaleOffset);
-			DrawFlagToggleProperty(s_forceColorLabel, ref materialFlags, MaterialFlags.ForceColor);
-			DrawFlagToggleProperty(s_forceCutoffLabel, ref materialFlags, MaterialFlags.ForceCutoff);
+			DrawFlagToggleProperty(s_forceTextureLabel, MaterialFlags.ForceTexture, ref materialFlags, ref mixedValueMaterialFlags);
+			DrawFlagToggleProperty(s_forceMaskLabel, MaterialFlags.ForceMask, ref materialFlags, ref mixedValueMaterialFlags);
+			DrawFlagToggleProperty(s_forceMaskScaleOffsetLabel, MaterialFlags.ForceMaskScaleOffset, ref materialFlags, ref mixedValueMaterialFlags);
+			DrawFlagToggleProperty(s_forceColorLabel, MaterialFlags.ForceColor, ref materialFlags, ref mixedValueMaterialFlags);
+			DrawFlagToggleProperty(s_forceCutoffLabel, MaterialFlags.ForceCutoff, ref materialFlags, ref mixedValueMaterialFlags);
 			EditorGUI.indentLevel--;
 		}
 
-		if(!materialFlagesProp.hasMixedValue)
-			materialFlagesProp.floatValue = (float)materialFlags;
+		if(EditorGUI.EndChangeCheck())
+		{
+			if(materialFlagesProp.hasMixedValue)
+				SetMixedValueMatrialFlags(materialEditor, materialFlags, mixedValueMaterialFlags);
+			else
+				materialFlagesProp.floatValue = (float)materialFlags;
+		}
 
 		EditorGUILayout.Space();
 		EditorGUILayout.Space();
@@ -123,12 +130,44 @@ public class UnlitShaderGUI : ShaderGUI
 		return property;
 	}
 
-	static bool DrawFlagToggleProperty(GUIContent label, ref MaterialFlags allFlags, MaterialFlags flag)
+	static void DrawFlagToggleProperty(GUIContent label, MaterialFlags flag, ref MaterialFlags allFlags, ref MaterialFlags mixedValueFlags)
 	{
-		bool toggle = GetMaterialFlag(allFlags, flag);
-		toggle = EditorGUILayout.Toggle(label, toggle);
-		allFlags = SetMaterialFlag(allFlags, flag, toggle);
-		return toggle;
+		bool value = GetMaterialFlag(allFlags, flag);
+		bool mixedValue = GetMaterialFlag(mixedValueFlags, flag);
+
+		EditorGUI.BeginChangeCheck();
+		EditorGUI.showMixedValue = mixedValue;
+		value = EditorGUILayout.Toggle(label, value);
+		EditorGUI.showMixedValue = false;
+		if(EditorGUI.EndChangeCheck())
+			mixedValueFlags = SetMaterialFlag(mixedValueFlags, flag, false);
+
+		allFlags = SetMaterialFlag(allFlags, flag, value);
+	}
+
+	static MaterialFlags GetMixedValueMaterialFlags(MaterialEditor materialEditor)
+	{
+		MaterialFlags onFlags = MaterialFlags.None;
+		MaterialFlags offFlags = ~MaterialFlags.None;
+		
+		foreach(Material material in materialEditor.targets)
+		{
+			MaterialFlags materialFlags = (MaterialFlags)material.GetInt(MaterialFlagsPropName);
+			onFlags |= materialFlags;
+			offFlags &= materialFlags;
+		}
+
+		return onFlags ^ offFlags;
+	}
+	
+	static void SetMixedValueMatrialFlags(MaterialEditor materialEditor, MaterialFlags allFlags, MaterialFlags mixedValueFlags)
+	{
+		foreach(Material material in materialEditor.targets)
+		{
+			MaterialFlags materialFlags = (MaterialFlags)material.GetInt(MaterialFlagsPropName);
+			materialFlags = (materialFlags & mixedValueFlags) | (allFlags & ~mixedValueFlags);
+			material.SetInt(MaterialFlagsPropName, (int) materialFlags);
+		}
 	}
 
 	void MaterialChanged(Material mat)
