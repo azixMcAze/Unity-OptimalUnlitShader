@@ -92,10 +92,7 @@ public class UnlitShaderGUI : ShaderGUI
 		if((RenderingMode)renderingModeProp.floatValue == RenderingMode.Cutout && !renderingModeProp.hasMixedValue)
 			DrawProperty(CutoffPropName, materialEditor, properties);
 
-		bool advancedToggle = GetMaterialFlag(materialFlags, MaterialFlags.AdvancedToggle);
-		bool mixedValueAdvancedToggle = GetMaterialFlag(mixedValueMaterialFlags, MaterialFlags.AdvancedToggle);
-		advancedToggle = EditorGUILayout.Foldout(advancedToggle || mixedValueAdvancedToggle, s_advancedLabel);
-		materialFlags = SetMaterialFlag(materialFlags, MaterialFlags.AdvancedToggle, advancedToggle);
+		bool advancedToggle = DrawFlagFoldoutProperty(s_advancedLabel, MaterialFlags.AdvancedToggle, ref materialFlags, ref mixedValueMaterialFlags);
 		
 		if(advancedToggle)
 		{
@@ -143,6 +140,21 @@ public class UnlitShaderGUI : ShaderGUI
 			mixedValueFlags = SetMaterialFlag(mixedValueFlags, flag, false);
 
 		allFlags = SetMaterialFlag(allFlags, flag, value);
+	}
+
+	static bool DrawFlagFoldoutProperty(GUIContent label, MaterialFlags flag, ref MaterialFlags allFlags, ref MaterialFlags mixedValueFlags)
+	{
+		bool value = GetMaterialFlag(allFlags, flag);
+		bool mixedValue = GetMaterialFlag(mixedValueFlags, flag);
+
+		EditorGUI.BeginChangeCheck();
+		value = EditorGUILayout.Foldout(value || mixedValue, label);
+		if(EditorGUI.EndChangeCheck())
+			mixedValueFlags = SetMaterialFlag(mixedValueFlags, flag, false);
+
+		allFlags = SetMaterialFlag(allFlags, flag, value);
+
+		return value;
 	}
 
 	static MaterialFlags GetMixedValueMaterialFlags(MaterialEditor materialEditor)
