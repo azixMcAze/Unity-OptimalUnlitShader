@@ -23,6 +23,7 @@ public class UnlitShaderGUI : ShaderGUI
 		ForceMaskScaleOffset = 1 << 4,
 		ForceColor = 1 << 5,
 		ForceCutoff = 1 << 6,
+		ManualRenderQueue = 1 << 7,
 	}
 
 	public const string RenderingModePropName = "_RenderingMode";
@@ -42,6 +43,7 @@ public class UnlitShaderGUI : ShaderGUI
 	static readonly GUIContent s_forceMaskScaleOffsetLabel = new GUIContent("Do not disable Mask Tiling & Offset");
 	static readonly GUIContent s_forceColorLabel = new GUIContent("Do not disable Color");
 	static readonly GUIContent s_forceCutoffLabel = new GUIContent("Do not disable Alpha Cutoff");
+	static readonly GUIContent s_manualRenderQueueLabel = new GUIContent("Manual Render Queue");
 
 			
 	bool m_firstTime = false;
@@ -100,6 +102,7 @@ public class UnlitShaderGUI : ShaderGUI
 			DrawFlagToggleProperty(s_forceMaskScaleOffsetLabel, MaterialFlags.ForceMaskScaleOffset, ref materialFlags, ref mixedValueMaterialFlags);
 			DrawFlagToggleProperty(s_forceColorLabel, MaterialFlags.ForceColor, ref materialFlags, ref mixedValueMaterialFlags);
 			DrawFlagToggleProperty(s_forceCutoffLabel, MaterialFlags.ForceCutoff, ref materialFlags, ref mixedValueMaterialFlags);
+			DrawFlagToggleProperty(s_manualRenderQueueLabel, MaterialFlags.ManualRenderQueue, ref materialFlags, ref mixedValueMaterialFlags);
 			EditorGUI.indentLevel--;
 		}
 
@@ -215,6 +218,7 @@ public class UnlitShaderGUI : ShaderGUI
 		EnableKeyword(mat, "_COLOR_OFF", noColor && !forceColorFlag);
 
 		RenderingMode renderingMode = (RenderingMode)mat.GetInt(RenderingModePropName);
+		bool manualRenderQueue = GetMaterialFlag(materialFlags, MaterialFlags.ManualRenderQueue);
 
 		switch (renderingMode)
 		{
@@ -224,7 +228,8 @@ public class UnlitShaderGUI : ShaderGUI
 				mat.SetInt(DstBlendPropName, (int)UnityEngine.Rendering.BlendMode.Zero);
 				mat.SetInt(ZWritePropName, 1);
 				EnableKeyword(mat, "_ALPHATEST_ON", false);
-				mat.renderQueue = -1;
+				if(!manualRenderQueue)
+					mat.renderQueue = -1;
 				break;
 
 			case RenderingMode.Cutout:
@@ -235,7 +240,8 @@ public class UnlitShaderGUI : ShaderGUI
 				bool alphaTest = mat.GetFloat(CutoffPropName) > 0f;
 				bool forceCutoff = GetMaterialFlag(materialFlags, MaterialFlags.ForceCutoff);
 				EnableKeyword(mat, "_ALPHATEST_ON", alphaTest || forceCutoff);
-				mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
+				if(!manualRenderQueue)
+					mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
 				break;
 
 			case RenderingMode.Transparent:
@@ -244,7 +250,8 @@ public class UnlitShaderGUI : ShaderGUI
 				mat.SetInt(DstBlendPropName, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
 				mat.SetInt(ZWritePropName, 0);
 				EnableKeyword(mat, "_ALPHATEST_ON", false);
-				mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+				if(!manualRenderQueue)
+					mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
 				break;
 		}
 	}
