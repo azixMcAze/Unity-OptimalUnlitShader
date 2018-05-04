@@ -36,17 +36,17 @@
 			#pragma shader_feature _ _ALPHATEST_ON
 			#include "UnityCG.cginc"
 
-			#define CONCAT(A, B) A ## B
-
 			#if !defined(_TEXTURE_OFF) && !defined(_MASK_OFF)
 
 				#define UV1_TEXCOORD
 				#define UV1_SCALE_OFFSET _MainTex
+				#define UV1_SCALE_OFFSET_ST _MainTex_ST
 				#define MAINTEX_UV uv1
 
 				#if !defined(_MASK_SCALE_OFFSET_OFF)
 					#define UV2_TEXCOORD
 					#define UV2_SCALE_OFFSET _Mask
+					#define UV2_SCALE_OFFSET_ST _Mask_ST
 					#define MASK_UV uv2
 					#define FOG_TEXCOORD 2
 				#else
@@ -59,6 +59,7 @@
 
 				#define UV1_TEXCOORD
 				#define UV1_SCALE_OFFSET _MainTex
+				#define UV1_SCALE_OFFSET_ST _MainTex_ST
 				#define MAINTEX_UV uv1
 
 				#define FOG_TEXCOORD 1
@@ -68,8 +69,10 @@
 				#define UV1_TEXCOORD
 				#if !defined(_MASK_SCALE_OFFSET_OFF)
 					#define UV1_SCALE_OFFSET _Mask
+					#define UV1_SCALE_OFFSET_ST _Mask_ST
 				#else
 					#define UV1_SCALE_OFFSET _MainTex
+					#define UV1_SCALE_OFFSET_ST _MainTex_ST
 				#endif
 				#define MASK_UV uv1
 
@@ -102,14 +105,14 @@
 		#if !defined(_TEXTURE_OFF)
 			sampler2D _MainTex;
 		#endif
-		#if defined(UV1_SCALE_OFFSET)
-			float4 CONCAT(UV1_SCALE_OFFSET, _ST);
+		#if defined(UV1_SCALE_OFFSET_ST)
+			float4 UV1_SCALE_OFFSET_ST;
 		#endif
 		#if !defined(_MASK_OFF)
 			sampler2D _Mask;
 		#endif
-		#if defined(UV2_SCALE_OFFSET)
-			float4 CONCAT(UV2_SCALE_OFFSET, _ST);
+		#if defined(UV2_SCALE_OFFSET_ST)
+			float4 UV2_SCALE_OFFSET_ST;
 		#endif
 		#if !defined(_COLOR_OFF)
 			fixed4 _Color;
